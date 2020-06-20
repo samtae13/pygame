@@ -40,6 +40,20 @@ class Player(Ship):
         super().__init__(x, y, health)
         self.ship_img = YELLOW_SPACE_SHIP
 
+class Enemy(Ship):
+    COLOR_MAP = {
+        'red' : RED_SPACE_SHIP,
+        'green' : GREEN_SPACE_SHIP,
+        'blue' : BLUE_SPACE_SHIP
+    }
+
+    def __init__(self, x, y, color, health=100):
+        super().__init__(x, y, health)
+        self.ship_img = self.COLOR_MAP[color]
+
+    def move(self, vel):
+        self.y += vel
+
 
 
 
@@ -54,6 +68,10 @@ def main():
     player = Player(350, 600)
     player_vel = 5
 
+    enemies = []
+    wave_length = 5
+    enemy_vel =2
+
     main_font = pygame.font.SysFont('comicsans', 50)
 
     def redraw_window():
@@ -64,12 +82,22 @@ def main():
         WIN.blit(lives_label, (10, 10))
         WIN.blit(level_label, (SCREEN_WIDTH - level_label.get_width() - 10, 10))
 
+        for enemy in enemies:
+            enemy.draw(WIN)
         player.draw(WIN)
         pygame.display.update()
 
     while run:
         clock.tick(FPS)
         redraw_window()
+
+        if len(enemies) == 0:
+            wave_length += 5
+            for i in range(wave_length):
+                enemy = Enemy(random.randint(50, 700),
+                              random.randint(-1000, -100),
+                              random.choice(['red', 'blue', 'green']))
+                enemies.append(enemy)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -83,4 +111,9 @@ def main():
             player.y -= player_vel
         if keys[pygame.K_s] and player.y - player_vel < SCREEN_HEIGHT - player.get_height():
             player.y += player_vel
+
+        for enemy in enemies:
+            enemy.move(enemy_vel)
+            if enemy.y > SCREEN_HEIGHT:
+                enemies.remove(enemy)
 main()
